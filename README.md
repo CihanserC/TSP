@@ -1,2 +1,2 @@
-# TSP-with-GA
+# Traveling Salesman Problem with Genetic Algorithms
  
