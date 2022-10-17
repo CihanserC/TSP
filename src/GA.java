@@ -40,8 +40,7 @@ public class GA {
         FileWriter fileWriter = new FileWriter(dataPath,true);
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
         for ( int i = 0; i < population.length; i++ ) {
-            population[ i ] = new Solution_TSP( cityNumber );
-            population[ i ].randomize();
+            population[ i ] = new Solution_TSP( 0 ); // type=0 means random solution
         }
 
         for ( int i = 0; i < generationCount; i++ ) {
@@ -53,7 +52,7 @@ public class GA {
             //crossover
             for ( int j = 0; j < population.length; j += 2 ) {
                 if ( rnd.nextDouble() < crossOverRate ) {
-                    Solution_TSP[] offspring = parentSelectionByTournament( matingPool[ j ], matingPool[ j + 1 ] );
+                    Solution_TSP[] offspring = onePointCrossOver( matingPool[ j ], matingPool[ j + 1 ] );
                     children[ j ] = offspring[ 0 ];
                     children[ j + 1 ] = offspring[ 1 ];
                 }
@@ -64,42 +63,32 @@ public class GA {
             }
             //mutation
             for ( int j = 0; j < children.length; j++ ) {
-                for ( int k = 0; k < cityNumber; k++ ) {
-                    for ( int p = 0; p < cityNumber; p++ ){
-                        if ( rnd.nextDouble()<mutationRate) {
-                            children[j].setCity(k,p, !children[j].getCity (k,p) );
-                        }
-                    }
-
+                if ( rnd.nextDouble()<mutationRate) {
+                    children[j].swap(rnd.nextInt(cityNumber), rnd.nextInt(cityNumber));
                 }
+
             }
+
             //survivor selection
             population=children;
 
-            int best = 0;
-            int worst = cityNumber * cityNumber;
-            int total = 0;
+            double best = 0;
+            double total = 0;
+            Solution_TSP bestSolution = null;
             for ( int j = 0; j < population.length; j++ ) {
-                if ( population[j].getFitness() > best ){
+                if ( population[j].getFitness() < best ){
                     best = population[j].getFitness();
-                }
-                if ( population[j].getFitness() < worst ){
-                    worst = population[j].getFitness();
+                    bestSolution = population[j];
                 }
                 total+=population[j].getFitness();
             }
-            System.out.println( "Best: " + best + " Average: " + (double)total / population.length + " Worst: " + worst );
-
-
-
-            String resultString= "";
-            resultString += (i+1) + "-" + best + "-" + worst + "-" + ((double)total / population.length);
+            String resultString= "Best " + bestSolution.toString();
+            System.out.println(resultString);
+            resultString += ((i+1) + "-" + bestSolution.toString());
             bufferedWriter.write(resultString);
             bufferedWriter.newLine();
         }
         bufferedWriter.close();
-
-
     }
 
     private Solution_TSP parentSelectionByTournament() {
@@ -132,6 +121,23 @@ public class GA {
             }
         }
         return population[0];
+    }
+
+    private Solution_TSP[] onePointCrossOver( Solution_TSP firstParent, Solution_TSP secondParent) {
+        Random rnd = new Random();
+        int position = rnd.nextInt( firstParent.tour.size() );
+        Solution_TSP[] children = new Solution_TSP[2];
+        children[ 0 ] = new Solution_TSP( firstParent.tour );
+        children[ 1 ] = new Solution_TSP( secondParent.tour );
+        for ( int i = 0; i < position; i++ ) {
+            children[ 0 ].setCity( i, firstParent.getCity( i ) );
+            children[ 1 ].setCity( i, secondParent.getCity( i ) );
+        }
+        for ( int i = position; i < firstParent.tour.size(); i++ ) {
+            children[ 0 ].setCity( i, secondParent.getCity( i ) );
+            children[ 1 ].setCity( i, firstParent.getCity( i ) );
+        }
+        return children;
     }
 
 

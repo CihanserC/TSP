@@ -1,17 +1,19 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ProblemInstance_TSP {
 
-    // Coordinate: Coordinates of the cities and DM is distance matrix whih calculates the distance of cities of each other
     private static ArrayList<ArrayList<Double>> Coordinate, DM;
-    private static int n = 0;   // Number of the cities
+    private static int n = 0;
 
     public ProblemInstance_TSP(String fileName) {
         loadInstance(fileName);
         calculateDistanceMatrix();
+        writeDmToFile();
     }
 
     private void loadInstance(String fileName) {
@@ -92,5 +94,21 @@ public class ProblemInstance_TSP {
 
     public static int getNbOfCities() {
         return n;
+    }
+
+    public static void writeDmToFile() {
+        try {
+            FileWriter myWriter = new FileWriter("DM.txt");
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    myWriter.write(DM.get(i).get(j) + " ");
+                }
+                myWriter.write("\n");
+            }
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 }
