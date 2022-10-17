@@ -94,7 +94,7 @@ public class GA {
     private Solution_TSP parentSelectionByTournament() {
         int p1 = rnd.nextInt( population.length );
         int p2 = rnd.nextInt( population.length );
-        if ( population[ p1 ].getFitness() > population[ p2 ].getFitness() ) {
+        if ( population[ p1 ].getFitness() < population[ p2 ].getFitness() ) {
             return population[ p1 ];
         }
         else {
