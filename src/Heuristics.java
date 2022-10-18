@@ -26,14 +26,14 @@ public class Heuristics {
                             end--;
                         }
                         s.evaluate();
-                        System.out.println("TwoOpt: "+s.toString()); // Print tour
+                        //System.out.println("TwoOpt: "+s.toString()); // Print tour
                         modified = true;
                     }
                 }
             }
         }
         s.evaluate();
-        System.out.println("TwoOpt: "+s.toString()); // Print tour
+        //System.out.println("TwoOpt: "+s.toString()); // Print tour
         return s;
     }
 
@@ -46,7 +46,7 @@ public class Heuristics {
 
         Solution_TSP current = new Solution_TSP(0);
         System.out.println("SA: "+current.toString()); // Print tour
-        current = twoOpt(current);
+        //current = twoOpt(current);
         System.out.println("SA: "+current.toString()); // Print tour
 
         Solution_TSP best = new Solution_TSP(current);
@@ -55,39 +55,45 @@ public class Heuristics {
         do
         {
             neighbor = new Solution_TSP(current);
-            Solution_TSP bestNeigbor = new Solution_TSP(current);
 
-            for (int i = 0; i < ProblemInstance_TSP.getNbOfCities(); i++) {
-
-                for (int j = 0; j < ProblemInstance_TSP.getNbOfCities(); j++) {
-                    if (i == j) { continue; }
-                    neighbor.removeAndInsert(i, j);
-                    neighbor.evaluate();
-                    if (neighbor.getFitness() < bestNeigbor.getFitness())
-                    {
-                        bestNeigbor = new Solution_TSP(neighbor);
-                        System.out.println("SA: "+best.toString()); // Print tour
-
-                    }
-                }
-            }
-
-            if (bestNeigbor.getFitness() < current.getFitness())
+//            for (int i = 0; i < ProblemInstance_TSP.getNbOfCities(); i++) {
+//
+//                for (int j = 0; j < ProblemInstance_TSP.getNbOfCities(); j++) {
+//                    if (i == j) { continue; }
+//                    neighbor = new Solution_TSP(current);
+//                    neighbor.removeAndInsert(i, j);
+//
+//                    neighbor.evaluate();
+//                    if (neighbor.getFitness() < bestNeigbor.getFitness())
+//                    {
+//                        bestNeigbor = new Solution_TSP(neighbor);
+//                        System.out.println("SA: "+best.toString()); // Print tour
+//
+//                    }
+//                }
+//            }
+//               int a = rnd.nextInt(ProblemInstance_TSP.getNbOfCities());
+//               int b = rnd.nextInt(ProblemInstance_TSP.getNbOfCities());
+//               neighbor.removeAndInsert(a,b);
+            neighbor = new Solution_TSP(FindNeighbors(neighbor));
+               neighbor.evaluate();
+               twoOpt(neighbor);
+            if (neighbor.getFitness() < current.getFitness())
             {
-                current = new Solution_TSP(bestNeigbor);
-                if (bestNeigbor.getFitness() < best.getFitness())
+                current = new Solution_TSP(neighbor);
+                if (neighbor.getFitness() < best.getFitness())
                 {
-                    best = new Solution_TSP(bestNeigbor);
+                    best = new Solution_TSP(neighbor);
                     System.out.println("SA: "+best.toString()); // Print tour
                 }
             }
             else
             {
-                double probability = (double)(1 / (1 + (Math.pow(Math.E, (current.getFitness() - bestNeigbor.getFitness()) / T))));
+                double probability = (double)(1 / (1 + (Math.pow(Math.E, (current.getFitness() - neighbor.getFitness()) / T))));
                 double chance = rnd.nextDouble();
                 if (chance <= probability)
                 {
-                    current = new Solution_TSP(bestNeigbor);
+                    current = new Solution_TSP(neighbor);
                 }
             }
 
@@ -106,32 +112,33 @@ public class Heuristics {
         {
             Solution_TSP current = new Solution_TSP(0);
             current.evaluate();
-            Solution_TSP bestNeighbor = new Solution_TSP(current.tour);
-            best = new Solution_TSP(current.tour);
-
-            for (Solution_TSP neighbor : FindNeighbors(current))
-            {
-                neighbor.evaluate();
-                bestNeighbor.evaluate();
-                if(neighbor.getFitness() < bestNeighbor.getFitness()){
-                    best = neighbor;
-                    continue;
-                }
-                if (tabuList.contains(neighbor)){
-                    continue;
-                }
-
-                neighbor.evaluate();
-                bestNeighbor.evaluate();
-                if(neighbor.getFitness() < bestNeighbor.getFitness()){
-                    bestNeighbor = neighbor;
-                }
+            twoOpt(current);
+            Solution_TSP neighbor = new Solution_TSP(FindNeighbors(current));
+            if(i==0){
+                best = new Solution_TSP(current);
             }
-            bestNeighbor.evaluate();
-            best.evaluate();
-            if(bestNeighbor.getFitness() < best.getFitness()){
-                best = bestNeighbor;
+//            for (Solution_TSP neighbor : FindNeighbors(current))
+//            {
+//                neighbor.evaluate();
+//                bestNeighbor.evaluate();
+//                if(neighbor.getFitness() < bestNeighbor.getFitness()){
+//                    best = neighbor;
+//                    continue;
+//                }
+//                if (tabuList.contains(neighbor)){
+//                    continue;
+//                }
+//
+//                neighbor.evaluate();
+//                bestNeighbor.evaluate();
+//                if(neighbor.getFitness() < bestNeighbor.getFitness()){
+//                    bestNeighbor = neighbor;
+//                }
+//            }
+            if(neighbor.getFitness() < best.getFitness()){
+                best = neighbor;
                 System.out.println("Tabu search: "+best.toString()); // Print tour
+                continue;
             }
             // Update tabu list: FIFO
             if(tabuList.size() >= 100){
@@ -142,24 +149,24 @@ public class Heuristics {
         return best;
     }
 
-    public static List<Solution_TSP> FindNeighbors(Solution_TSP current){
+    public static Solution_TSP FindNeighbors(Solution_TSP current){
 
         List<Solution_TSP> NeighborList = new ArrayList<Solution_TSP>();
-        Solution_TSP neighbor = null;
+        Solution_TSP neighbor = new Solution_TSP(current);
+        Solution_TSP bestNeighbor = new Solution_TSP(neighbor);
 
         for (int i = 0; i < current.tour.size(); i++) {
-            neighbor = new Solution_TSP(current.tour);
             for (int j = i+1; j < current.tour.size()-1; j++) {
-                if(i==j){
-                    continue;
-                }
+                neighbor = new Solution_TSP(current.tour);
+
+                if(i==j){ continue; }
                 neighbor.swap(i, j);
-                //NeighborList.add(new Solution_TSP( ));
-                if(NeighborList.size() == 100){
-                    return NeighborList;
+                neighbor.evaluate();
+                if (neighbor.getFitness() < bestNeighbor.getFitness()) {
+                    bestNeighbor = new Solution_TSP(neighbor);
                 }
             }
         }
-        return NeighborList;
+        return bestNeighbor;
     }
 }
