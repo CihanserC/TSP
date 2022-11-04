@@ -13,7 +13,6 @@ public class GA {
     private static  int populationSize;
     private static  double crossOverRate;
     private static  double mutationRate;
-
     private static  int generationCount;
     private static  int targetFitness; // Best Fitness value is 7542 For Berlin52.tsp
     private static int cityNumber;
@@ -76,11 +75,11 @@ public class GA {
             double total = 0;
             Solution_TSP bestSolution = null;
             for ( int j = 0; j < population.length; j++ ) {
-                if ( population[j].getFitness() < best ){
-                    best = population[j].getFitness();
+                if ( population[j].getFitness(1) < best ){
+                    best = population[j].getFitness(1);
                     bestSolution = population[j];
                 }
-                total+=population[j].getFitness();
+                total+=population[j].getFitness(1);
             }
             String resultString= "Best " + bestSolution.toString();
             System.out.println(resultString);
@@ -94,7 +93,7 @@ public class GA {
     private Solution_TSP parentSelectionByTournament() {
         int p1 = rnd.nextInt( population.length );
         int p2 = rnd.nextInt( population.length );
-        if ( population[ p1 ].getFitness() < population[ p2 ].getFitness() ) {
+        if ( population[ p1 ].getFitness(1) < population[ p2 ].getFitness(1) ) {
             return population[ p1 ];
         }
         else {
@@ -105,13 +104,13 @@ public class GA {
     private Solution_TSP parentSelectionByRouletteWheel() {
         double totalFitness = 0;
         for (Solution_TSP tour : population) {
-            totalFitness += tour.getFitness();
+            totalFitness += tour.getFitness(1);
         }
 
         double[] prob = new double[population.length];
-        prob[0] = population[0].getFitness()/totalFitness;
+        prob[0] = population[0].getFitness(1)/totalFitness;
         for (int j = 1; j < population.length; j++) {
-            prob[j] = population[j].getFitness()/totalFitness + prob[j-1];
+            prob[j] = population[j].getFitness(1)/totalFitness + prob[j-1];
         }
 
         double randomNumber = rnd.nextDouble();

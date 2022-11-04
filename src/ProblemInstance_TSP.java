@@ -7,17 +7,41 @@ import java.util.Scanner;
 
 public class ProblemInstance_TSP {
 
-    private static ArrayList<ArrayList<Double>> Coordinate, DM;
+    private static ArrayList<ArrayList<Double>> Coordinate, DM, TM;
     private static int n = 0;
+    private String instanceFileName, TMfileName;
 
-    public ProblemInstance_TSP(String fileName) {
-        loadInstance(fileName);
+    public ProblemInstance_TSP(String instanceFileName, String TMfileName) {
+        this.instanceFileName = instanceFileName;
+        this.TMfileName = TMfileName;
+        loadInstance();
         calculateDistanceMatrix();
-        writeDmToFile();
+        loadTM();
+    }
+    private void loadTM(){
+        TM = new ArrayList<>();
+        File file = new File(TMfileName);
+        Scanner sc = null;
+        try {
+            sc = new Scanner(file);
+        } catch (FileNotFoundException ex) {
+            System.out.println(ex);
+        }
+
+        String[] data = null;
+        while (sc.hasNextLine()) {
+            //System.out.println(sc.nextLine());
+            data = sc.nextLine().split(" ");
+            ArrayList<Double> row = new ArrayList<>();
+            for (int i = 0; i < data.length; i++) {
+                row.add(Double.parseDouble(data[i]));
+            }
+            TM.add(row);
+        }
     }
 
-    private void loadInstance(String fileName) {
-        File file = new File(fileName);
+    private void loadInstance() {
+        File file = new File(instanceFileName);
         Scanner sc = null;
         try {
             sc = new Scanner(file);
@@ -44,7 +68,7 @@ public class ProblemInstance_TSP {
             }
             Double x = Double.parseDouble(data[1]);
             Double y = Double.parseDouble(data[2]);
-            ArrayList<Double> coord = new ArrayList<Double>() {
+            ArrayList<Double> coord = new ArrayList<>() {
                 {
                     add(x);
                     add(y);
@@ -92,6 +116,9 @@ public class ProblemInstance_TSP {
         return DM.get(city1).get(city2);
     }
 
+    public static double getTime(int city1, int city2){
+        return TM.get(city1).get(city2);
+    }
     public static int getNbOfCities() {
         return n;
     }
